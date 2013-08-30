@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "mythread.h"
+#include <pthread.h> //for the time being
 
 
 // Create a new thread.
@@ -51,5 +52,7 @@ int MySemaphoreDestroy(MySemaphore sem){
 // ****** CALLS ONLY FOR UNIX PROCESS ****** 
 // Create the "main" thread
 void MyThreadInit(void(*start_funct)(void *), void *args){
-
+	pthread_t pth;
+	pthread_create(&pth, NULL, (void *)start_funct, args);
+	pthread_join(pth,NULL);
 }
