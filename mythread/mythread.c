@@ -53,8 +53,3 @@ int MySemaphoreDestroy(MySemaphore sem){
 void MyThreadInit(void(*start_funct)(void *), void *args){
 
 }
-
-// Start running the "main" thread
-void MyThreadRun(void){
-
-}
