@@ -2,12 +2,12 @@
 #include "mythread.h"
 #include <stdlib.h>
 
-Node *create(){
+Node *create_q(){
 	Node *new = (Node *) malloc(sizeof(Node));
 	return new;
 }
 
-void insert(MyThread *thread, Node *head){
+void insert_q(MyThread *thread, Node *head){
 	Node *new = (Node *) malloc(sizeof(Node));
 	Node *current = head;
 	while(current -> this_t){
@@ -18,7 +18,7 @@ void insert(MyThread *thread, Node *head){
 	current -> next = new;
 }
 
-MyThread *remove(Node *head){
+MyThread *remove_q(Node *head){
 	MyThread *t = &(head->this_t);
 	Node *temp = head;
 	head = head -> next;

@@ -1,5 +1,6 @@
 #include <stdio.h>
-#include "mythread.h"
+#include "../mythread.h"
+#include "../threadq.h"
 
 void t0(void * dummy)
 {

@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "mythread.h"
+#include "../mythread.h"
 
 int mode = 0;
 

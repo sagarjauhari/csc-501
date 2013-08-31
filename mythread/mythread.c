@@ -1,11 +1,19 @@
 #include <stdlib.h>
 #include "mythread.h"
-#include <pthread.h> //for the time being
+#include <ucontext.h>
+#include "threadq.h"
+#include <pthread.h> //TODO: Remove library
 
+Node* head_q;
+
+typedef struct _MyThread_{
+	ucontext_t pthread;
+} _MyThread;
 
 // Create a new thread.
 MyThread MyThreadCreate(void(*start_funct)(void *), void *args){
-
+	ucontext_t new_context;
+	
 }
 
 // Yield invoking thread
@@ -53,6 +61,8 @@ int MySemaphoreDestroy(MySemaphore sem){
 // Create the "main" thread
 void MyThreadInit(void(*start_funct)(void *), void *args){
 	pthread_t pth;
+	
+	head_q = create_q();
 	pthread_create(&pth, NULL, (void *)start_funct, args);
 	pthread_join(pth,NULL);
 }

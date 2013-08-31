@@ -8,11 +8,11 @@ typedef struct node{
 	struct node *next;
 } Node;
 
-Node *create();
+Node *create_q();
 
-void insert(MyThread *thread, Node *head);
+void insert_q(MyThread *thread, Node *head);
 
-MyThread *remove(Node *head);
+MyThread *remove_q(Node *head);
 
 
 #endif /* THREADQ_H */
