@@ -35,7 +35,7 @@ MyThread MyThreadCreate(void(*start_funct)(void *), void *args){
     makecontext(context_new, (void (*)(void)) start_funct, args);
 	
 	new_thread->context_t = context_new;
-	new_thread->id = (++gl_thread_id);
+	new_thread->id = (gl_thread_id++);
 	q_insert(new_thread, ready_q);
 
 #ifdef DEBUG
@@ -50,8 +50,23 @@ void MyThreadYield(void){
 #ifdef DEBUG
 	printf(COLOR_ON "FUNC: '%s'\n" COLOR_OFF, __func__);
 #endif
+	
+	// Remove head and put at tail
+	_MyThread *t;
+	Node * temp = ready_q;
+	ready_q = ready_q -> next;
+	t = temp -> this_t;
+	q_insert(t,ready_q);
+	free(temp);
 
+	
 
+#ifdef DEBUG
+	q_print(ready_q,0);
+#endif
+
+	
+	swapcontext(t->context_t,ready_q -> this_t -> context_t);
 }
 
 // Join with a child thread
@@ -116,7 +131,7 @@ void MyThreadInit(void(*start_funct)(void *), void *args){
     makecontext(context_new, (void (*)(void)) start_funct, args);
 	
 	main_thread->context_t = context_new;
-	main_thread->id = (++gl_thread_id);
+	main_thread->id = (gl_thread_id++);
 	q_insert(main_thread, ready_q);
 
 #ifdef DEBUG

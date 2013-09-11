@@ -27,8 +27,8 @@ _MyThread * q_remove(Node *head){
 }
 
 void q_print(Node *head, int type){
+	int count = 0;
 	printf(COLOR_ON);
-	int count;
 	Node* temp = head;
 	if(type==0){
 		printf("RQ: ");
