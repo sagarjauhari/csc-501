@@ -5,6 +5,9 @@
 
 #define STACK_SIZE 8192 //8KB
 
+#define COLOR_ON    "\x1b[32m"
+#define COLOR_OFF   "\x1b[0m"
+
 typedef struct _MyThread_{
 	struct _MyThread_ *child; 		//head of list of children
 	struct _MyThread_ *next_sib; 	//next sibling

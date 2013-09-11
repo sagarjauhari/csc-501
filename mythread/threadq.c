@@ -14,7 +14,6 @@ void q_insert(_MyThread *thread, Node *head){
 	while(current -> this_t){
 		current = current -> next;
 	}
-
 	current -> this_t = thread;
 	current -> next = new;
 }
@@ -28,6 +27,7 @@ _MyThread * q_remove(Node *head){
 }
 
 void q_print(Node *head, int type){
+	printf(COLOR_ON);
 	int count;
 	Node* temp = head;
 	if(type==0){
@@ -41,4 +41,5 @@ void q_print(Node *head, int type){
 		temp = temp -> next;
 	}
 	printf(" - (Total=%d)\n",count);
+	printf(COLOR_OFF);
 }

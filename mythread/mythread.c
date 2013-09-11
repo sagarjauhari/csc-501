@@ -4,7 +4,7 @@
 #include <ucontext.h>
 #include "mythreadlib.h"
 
-//#define DEBUG
+#define DEBUG
 
 
 Node *ready_q;
@@ -15,7 +15,7 @@ int gl_thread_id;
 // Create a new thread.
 MyThread MyThreadCreate(void(*start_funct)(void *), void *args){
 #ifdef DEBUG
-	printf("FUNC: '%s'\n", __func__);
+	printf(COLOR_ON "FUNC: '%s'\n" COLOR_OFF, __func__);
 #endif
 	
 	int rc;
@@ -48,7 +48,7 @@ MyThread MyThreadCreate(void(*start_funct)(void *), void *args){
 // Yield invoking thread
 void MyThreadYield(void){
 #ifdef DEBUG
-	printf("FUNC: '%s'\n", __func__);
+	printf(COLOR_ON "FUNC: '%s'\n" COLOR_OFF, __func__);
 #endif
 
 
@@ -93,7 +93,7 @@ int MySemaphoreDestroy(MySemaphore sem){
 // Create the "main" thread
 void MyThreadInit(void(*start_funct)(void *), void *args){
 #ifdef DEBUG
-	printf("FUNC: '%s'\n", __func__);
+	printf(COLOR_ON "FUNC: '%s'\n" COLOR_OFF, __func__);
 #endif
 	
 	int rc;
