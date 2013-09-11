@@ -2,6 +2,7 @@
 #include "mythread.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <ucontext.h>
 
 Node *q_create(){
 	Node *new = (Node *) malloc(sizeof(Node));
@@ -16,6 +17,26 @@ void q_insert(_MyThread *thread, Node *head){
 	}
 	current -> this_t = thread;
 	current -> next = new;
+}
+
+void q_set_tail_context(ucontext_t *context, Node *head){
+	//If Q doesn't have any elements, then just return
+
+	//Node *new = (Node *) malloc(sizeof(Node));
+	Node *current = head;
+	if(!current -> this_t){
+		return;
+	}
+	
+	while(current -> next){
+		current = current -> next;
+	}
+	
+#ifdef DEBUG
+	printf(COLOR_ON "Setting tail uclink: t%d" COLOR_OFF,
+		current->this_t->id);
+#endif
+	current -> this_t ->context_t -> uc_link = context;
 }
 
 _MyThread * q_remove(Node *head){

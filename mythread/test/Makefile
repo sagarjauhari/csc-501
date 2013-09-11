@@ -1,5 +1,5 @@
 # Test Cases
-all: one passing ping tree test1
+all: one passing ping tree test0 test1
 
 fib: fib.c
 	gcc fib.c ../mythread.a -lpthread -o fib.out
@@ -15,6 +15,9 @@ ping: ping.c
 
 tree: tree.c
 	gcc tree.c ../mythread.a -lpthread -o tree.out
+
+test0: test0.c
+	gcc test0.c ../mythread.a -lpthread -o test0.out
 
 test1: test1.c
 	gcc test1.c ../mythread.a -lpthread -o test1.out
