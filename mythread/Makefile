@@ -4,7 +4,7 @@ archive: mythread.o
 	ar rcs mythread.a *.o; rm *.o
 
 mythread.o: mythread.c mythread.h
-	gcc -c *.c
+	gcc -g -c *.c
 
 clean:
 	rm mythread.a; cd test; make clean;

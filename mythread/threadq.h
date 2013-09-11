@@ -2,17 +2,10 @@
 #define THREADQ_H
 
 #include "mythread.h"
+#include "mythreadlib.h"
 
-typedef struct node{
-	MyThread this_t;
-	struct node *next;
-} Node;
-
-Node *create_q();
-
-void insert_q(MyThread *thread, Node *head);
-
-MyThread *remove_q(Node *head);
-
-
+Node * q_create();
+void q_insert(_MyThread* thread, Node *head);
+_MyThread* q_remove(Node *head);
+void q_print(Node *head, int type);
 #endif /* THREADQ_H */
