@@ -74,18 +74,33 @@ void MyThreadInit(void(*start_funct)(void *), void *args){
 #endif
 	
 	int rc;
-	ucontext_t context_new, context_old;
-	_MyThread main_thread;						//Initialize mainThread
+	ucontext_t *context_new;
+	ucontext_t *context_old;
+	_MyThread *main_thread;
 	
+	main_thread = (_MyThread*)malloc(sizeof(_MyThread));
+	context_new = (ucontext_t*)malloc(sizeof(ucontext_t));
+	context_old = (ucontext_t*)malloc(sizeof(ucontext_t));
 	ready_q = q_create();
 	block_q = q_create();
+	char main_stack[STACK_SIZE]; //main thread stack
 	
-	main_thread.context_t = &context_new;
-	main_thread.id = (++gl_thread_id);
+	getcontext(context_new);
+    context_new->uc_link          = context_old;
+    context_new->uc_stack.ss_sp   = main_stack;
+    context_new->uc_stack.ss_size = sizeof(main_stack);
+    
+    makecontext(context_new, (void (*)(void)) start_funct, args);
+	
+	main_thread->context_t = context_new;
+	main_thread->id = (++gl_thread_id);
 	q_insert(&main_thread, ready_q);
+
+#ifdef DEBUG
 	q_print(ready_q,0);
-	q_remove(ready_q);
-	q_print(ready_q,0);
+#endif
+
+	swapcontext(context_old,context_new);
 }
 
 
