@@ -4,7 +4,7 @@
 #include <ucontext.h>
 #include "mythreadlib.h"
 
-#define DEBUG
+//#define DEBUG
 
 
 Node *ready_q;
@@ -17,11 +17,32 @@ MyThread MyThreadCreate(void(*start_funct)(void *), void *args){
 #ifdef DEBUG
 	printf("FUNC: '%s'\n", __func__);
 #endif
-	_MyThread *mythread;
-	ucontext_t context_new, context_old;
 	
+	int rc;
+	ucontext_t *context_new;
+	ucontext_t *context_old;
+	_MyThread *new_thread;
 	
-	return (MyThread)(void *)mythread;
+	new_thread = (_MyThread*)malloc(sizeof(_MyThread));
+	context_new = (ucontext_t*)malloc(sizeof(ucontext_t));
+	char new_stack[STACK_SIZE];
+	
+	rc = getcontext(context_new);
+    context_new->uc_link          = NULL;
+    context_new->uc_stack.ss_sp   = new_stack;
+    context_new->uc_stack.ss_size = sizeof(new_stack);
+    
+    makecontext(context_new, (void (*)(void)) start_funct, args);
+	
+	new_thread->context_t = context_new;
+	new_thread->id = (++gl_thread_id);
+	q_insert(new_thread, ready_q);
+
+#ifdef DEBUG
+	q_print(ready_q,0);
+#endif
+
+	return (MyThread)(void *)new_thread;
 }
 
 // Yield invoking thread
@@ -29,6 +50,8 @@ void MyThreadYield(void){
 #ifdef DEBUG
 	printf("FUNC: '%s'\n", __func__);
 #endif
+
+
 }
 
 // Join with a child thread
@@ -85,7 +108,7 @@ void MyThreadInit(void(*start_funct)(void *), void *args){
 	block_q = q_create();
 	char main_stack[STACK_SIZE]; //main thread stack
 	
-	getcontext(context_new);
+	rc = getcontext(context_new);
     context_new->uc_link          = context_old;
     context_new->uc_stack.ss_sp   = main_stack;
     context_new->uc_stack.ss_size = sizeof(main_stack);
@@ -94,13 +117,13 @@ void MyThreadInit(void(*start_funct)(void *), void *args){
 	
 	main_thread->context_t = context_new;
 	main_thread->id = (++gl_thread_id);
-	q_insert(&main_thread, ready_q);
+	q_insert(main_thread, ready_q);
 
 #ifdef DEBUG
 	q_print(ready_q,0);
 #endif
 
-	swapcontext(context_old,context_new);
+	rc = swapcontext(context_old,context_new);
 }
 
 

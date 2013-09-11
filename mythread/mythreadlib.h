@@ -20,14 +20,4 @@ typedef struct q_node_{
 	struct q_node_ * next;
 } Node;
 
-/**
-typedef struct ready_q_{
-	q_node * head;
-} ready_q;
-
-typedef struct block_q_{
-	q_node * head;
-} block_q;
-
-**/
 #endif //MYTHREADLIB_H
