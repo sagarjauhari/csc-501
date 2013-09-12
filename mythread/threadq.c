@@ -53,9 +53,17 @@ void q_print(Node *head, int type){
 	printf(COLOR_ON);
 	int count = 0;
 	Node* temp = head;
+	_MyThread* temp_t;
+	
 	while(temp->this_t){
 		++count;
-		printf("%d ",temp->this_t->id);
+		printf("%d (",temp->this_t->id);
+		temp_t = temp-> this_t -> child;
+		while(temp_t){
+			printf("%d,",temp_t->id);
+			temp_t = temp_t->next_sib;
+		}
+		printf("),");
 		temp = temp -> next;
 	}
 	printf(" - (Total=%d)\n",count);

@@ -9,7 +9,7 @@
 
 Node *ready_q;
 Node *block_q;
-int gl_thread_id;
+static int gl_thread_id;
 ucontext_t *context_old;
 
 
@@ -41,6 +41,19 @@ MyThread MyThreadCreate(void(*start_funct)(void *), void *args){
 	new_thread->context_t = context_new;
 	new_thread->id = (gl_thread_id++);
 	new_thread -> parent = ready_q -> this_t;
+	
+	/* Add new thread to list of parent's children */
+	_MyThread *last_child = ready_q->this_t->child;
+	if(!last_child){
+		ready_q -> this_t -> child = new_thread;
+	}else{
+		while(last_child->next_sib){
+			last_child = last_child->next_sib;
+		}
+		last_child->next_sib = new_thread;
+	}
+
+	
 	q_insert(new_thread, ready_q);
 
 	return (MyThread)(void *)new_thread;
@@ -62,7 +75,6 @@ void MyThreadYield(void){
 	ready_q = ready_q -> next;
 	t = temp -> this_t;
 	q_insert(t,ready_q);
-	//free(temp);
 	swapcontext(t->context_t,ready_q -> this_t -> context_t);
 }
 
@@ -95,6 +107,7 @@ void MyThreadExit(void){
 	/* Set Context */
 	if(ready_q -> this_t){
 		/* Free Memory */
+		free(temp);
 		
 		/* Change context */
 		setcontext(ready_q -> this_t -> context_t);
@@ -153,6 +166,13 @@ void MyThreadInit(void(*start_funct)(void *), void *args){
 	q_insert(main_thread, ready_q);
 
 	rc = swapcontext(context_old,context_new);
+
+	free(main_thread);
+	free(context_new);
+	free(context_old);
+	free(ready_q);
+	free(block_q);
+	free(main_stack);
 }
 
 
