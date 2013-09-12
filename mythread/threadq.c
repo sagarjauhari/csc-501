@@ -4,13 +4,15 @@
 #include <stdio.h>
 #include <ucontext.h>
 
-Node *q_create(){
+Node * q_create(){
 	Node *new = (Node *) malloc(sizeof(Node));
+	memset(new,0,sizeof(Node));
 	return new;
 }
 
 void q_insert(_MyThread *thread, Node *head){
 	Node *new = (Node *) malloc(sizeof(Node));
+	memset(new,0,sizeof(Node));
 	Node *current = head;
 	while(current -> this_t){
 		current = current -> next;
@@ -32,10 +34,10 @@ void q_set_tail_context(ucontext_t *context, Node *head){
 		current = current -> next;
 	}
 	
-#ifdef DEBUG
-	printf(COLOR_ON "Setting tail uclink: t%d" COLOR_OFF,
-		current->this_t->id);
-#endif
+	#ifdef DEBUG
+		printf(COLOR_ON "Setting tail uclink: t%d" COLOR_OFF,
+			current->this_t->id);
+	#endif
 	current -> this_t ->context_t -> uc_link = context;
 }
 
@@ -48,14 +50,9 @@ _MyThread * q_remove(Node *head){
 }
 
 void q_print(Node *head, int type){
-	int count = 0;
 	printf(COLOR_ON);
+	int count = 0;
 	Node* temp = head;
-	if(type==0){
-		printf("RQ: ");
-	}else{
-		printf("BQ: ");
-	}
 	while(temp->this_t){
 		++count;
 		printf("%d ",temp->this_t->id);

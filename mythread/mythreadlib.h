@@ -13,6 +13,7 @@ typedef struct _MyThread_{
 	struct _MyThread_ *next_sib; 	//next sibling
 	struct _MyThread_ *parent; 		//parent
 	ucontext_t *context_t;
+	ucontext_t *context_main; 		//only for main thread
 	int blocked_on_join;
 	int blocked_on_join_all;
 	int id; //1 is for main thread
