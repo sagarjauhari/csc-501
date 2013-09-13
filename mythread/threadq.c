@@ -55,6 +55,8 @@ void q_print(Node *head, int type){
 	Node* temp = head;
 	_MyThread* temp_t;
 	
+	if(!type) printf("\tRQ: ");
+	else printf("\tBQ: ");
 	while(temp->this_t){
 		++count;
 		printf("%d (",temp->this_t->id);

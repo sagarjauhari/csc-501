@@ -81,8 +81,63 @@ void MyThreadYield(void){
 // Join with a child thread
 int MyThreadJoin(MyThread thread){
 	#ifdef DEBUG
-		printf("FUNC: '%s'\n", __func__);
+		printf(COLOR_ON "FUNC: '%s'\n" COLOR_OFF, __func__);
 	#endif
+	
+	int th_to_join_is_alive=0;
+	/*
+	See if thread for which we're waiting is present atleast
+	on RQ or BQ. If not, then just insert calling thread in
+	ready queue
+	*/
+	
+
+	//Check on BQ
+	Node * bq_temp = block_q;
+	while(bq_temp -> this_t){
+		if(bq_temp -> this_t -> context_t == ((_MyThread*)thread) -> context_t){
+			th_to_join_is_alive=1;
+			break;
+		}
+		bq_temp = bq_temp -> next;
+	}
+	
+	//Check on RQ
+	Node * rq_temp = ready_q;
+	if(!th_to_join_is_alive){
+		while(rq_temp -> this_t){
+			if(rq_temp -> this_t -> context_t == ((_MyThread*)thread) -> context_t){
+				th_to_join_is_alive=1;
+				break;
+			}
+			rq_temp = rq_temp -> next;
+		}
+	}
+	
+	if(th_to_join_is_alive){
+		#ifdef DEBUG
+			printf(COLOR_ON "\tThread to be joined IS alive\n" COLOR_OFF);
+		#endif
+		
+		/* Set blocked on join flag, coz we're actually blocking now'*/
+		ready_q -> this_t -> blocked_on_join = 1;
+		
+		/* Remove from head of ready Q, add to BQ*/
+		rq_temp = ready_q;
+		_MyThread * t = rq_temp -> this_t;
+		ready_q = ready_q -> next;
+		q_insert(t, block_q);
+		swapcontext(t->context_t, ready_q->this_t->context_t);
+	}else{
+		/* just continue*/
+		#ifdef DEBUG
+			printf(COLOR_ON "\tThread to be joined NOT alive\n" COLOR_OFF);
+		#endif
+		return 0;
+	}
+	
+	
+	
 }
 
 // Join with all children
@@ -90,6 +145,8 @@ void MyThreadJoinAll(void){
 	#ifdef DEBUG
 		printf("FUNC: '%s'\n", __func__);
 	#endif
+	
+	ready_q -> this_t -> blocked_on_join_all = 1;
 }
 
 // Terminate invoking thread
@@ -99,15 +156,55 @@ void MyThreadExit(void){
 	#endif
 
 	/* Remove element from ready q */
-	Node * temp = ready_q;
+	Node * old_head = ready_q;
 	ready_q = ready_q -> next;
+	Node * to_free;
 	
-	/* Check if any parents waiting, say good bye to them */
+	/* Check if any parent waiting, say good bye to them.
+	   If parent waiting, bring it to ready Q */
+	Node * bq_temp = block_q;
+	_MyThread * child_temp;
+	int found_context_flag = 0;
+	while(bq_temp -> this_t){
+		child_temp = bq_temp -> this_t -> child;
+		while(child_temp){
+			if(child_temp -> context_t == old_head -> this_t -> context_t){
+				/* Found context match */
+				#ifdef DEBUG
+					printf("Found context!\n");
+				#endif
+				found_context_flag=1;
+				if(bq_temp -> this_t -> blocked_on_join){ //JOIN
+					bq_temp -> this_t -> blocked_on_join=0;
+					q_insert(bq_temp -> this_t, ready_q);
+					//free node
+					bq_temp -> this_t = bq_temp -> next -> this_t;
+					to_free = bq_temp -> next;
+					bq_temp -> next = bq_temp -> next -> next;
+					free(to_free);
+				}else if(bq_temp -> this_t -> blocked_on_join_all){//JOIN ALL
+					
+				}else{
+					#ifdef DEBUG
+						printf(COLOR_ON 
+						"Error: Thread was in blocked Q with no join flags set!\n"
+						COLOR_OFF);
+					#endif
+				}
+				break;
+			}
+			child_temp = child_temp -> next_sib;
+		}
+		if(found_context_flag){
+			break;
+		}
+		bq_temp = bq_temp -> next;
+	}
 	
 	/* Set Context */
 	if(ready_q -> this_t){
 		/* Free Memory */
-		free(temp);
+		free(old_head);
 		
 		/* Change context */
 		setcontext(ready_q -> this_t -> context_t);
