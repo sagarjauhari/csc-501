@@ -168,20 +168,27 @@ void MyThreadExit(void){
 	while(bq_temp -> this_t){
 		child_temp = bq_temp -> this_t -> child;
 		while(child_temp){
-			if(child_temp -> context_t == old_head -> this_t -> context_t){
+			if((!old_head -> this_t -> is_dead) && child_temp -> context_t == old_head -> this_t -> context_t){
 				/* Found context match */
 				#ifdef DEBUG
-					printf("Found context!\n");
+					printf(COLOR_ON "\tFound context!\n" COLOR_OFF);
 				#endif
 				found_context_flag=1;
 				if(bq_temp -> this_t -> blocked_on_join){ //JOIN
+					// insert to head of ready Q
 					bq_temp -> this_t -> blocked_on_join=0;
 					q_insert(bq_temp -> this_t, ready_q);
-					//free node
+					
+					// remove thread from parent's child list
+					old_head -> this_t -> is_dead = 1;
+					
+					//free node of BQ
 					bq_temp -> this_t = bq_temp -> next -> this_t;
 					to_free = bq_temp -> next;
 					bq_temp -> next = bq_temp -> next -> next;
 					free(to_free);
+					
+					//
 				}else if(bq_temp -> this_t -> blocked_on_join_all){//JOIN ALL
 					
 				}else{

@@ -16,6 +16,7 @@ typedef struct _MyThread_{
 	int blocked_on_join;
 	int blocked_on_join_all;
 	int id; //1 is for main thread
+	int is_dead;
 } _MyThread;
 
 typedef struct q_node_{
