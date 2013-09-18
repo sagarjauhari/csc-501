@@ -1,5 +1,5 @@
 # Test Cases
-all: one passing ping tree test0 test1 test2 test_join1 test_join2
+all: one passing ping tree test0 test1 test2 test_join1 test_join2 test_joinall1 test_joinall2
 
 fib: fib.c
 	gcc fib.c ../mythread.a -lpthread -o fib.out
@@ -30,6 +30,12 @@ test_join1: test_join1.c
 	
 test_join2: test_join2.c
 	gcc test_join2.c ../mythread.a -lpthread -o test_join2.out
+	
+test_joinall1: test_joinall1.c
+	gcc test_joinall1.c ../mythread.a -lpthread -o test_joinall1.out
+	
+test_joinall2: test_joinall2.c
+	gcc test_joinall2.c ../mythread.a -lpthread -o test_joinall2.out
 
 clean:
 	rm *.out

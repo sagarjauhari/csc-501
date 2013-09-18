@@ -4,7 +4,7 @@
 #include <ucontext.h>
 #include "mythreadlib.h"
 
-#define DEBUG
+//#define DEBUG
 
 
 Node *ready_q;
@@ -21,6 +21,7 @@ MyThread MyThreadCreate(void(*start_funct)(void *), void *args){
 	
 	#ifdef DEBUG
 		q_print(ready_q,0);
+		q_print(block_q,1);
 	#endif
 	
 	int rc;
@@ -127,6 +128,11 @@ int MyThreadJoin(MyThread thread){
 		_MyThread * t = rq_temp -> this_t;
 		ready_q = ready_q -> next;
 		q_insert(t, block_q);
+		
+		#ifdef DEBUG
+			q_print(block_q,1);
+		#endif
+		
 		swapcontext(t->context_t, ready_q->this_t->context_t);
 	}else{
 		/* just continue*/
@@ -143,10 +149,40 @@ int MyThreadJoin(MyThread thread){
 // Join with all children
 void MyThreadJoinAll(void){
 	#ifdef DEBUG
-		printf("FUNC: '%s'\n", __func__);
+		printf(COLOR_ON "FUNC: '%s'\n" COLOR_OFF, __func__);
+		q_print(ready_q,0);
 	#endif
 	
-	ready_q -> this_t -> blocked_on_join_all = 1;
+	Node * rq_temp;
+
+	// Find number of alive threads
+	int num_alive_children = 0;
+	_MyThread * child_temp_t;
+	child_temp_t = ready_q -> this_t -> child;
+	while(child_temp_t){
+		if(!child_temp_t -> is_dead) num_alive_children++;					
+		child_temp_t = child_temp_t -> next_sib;
+	}
+	
+	#ifdef DEBUG
+		printf(COLOR_ON "\t# of alive children: %d\n" COLOR_OFF, num_alive_children);
+	#endif
+	
+	if(num_alive_children > 0){
+		ready_q -> this_t -> blocked_on_join_all = 1;
+		
+		/* Remove from head of ready Q, add to BQ*/
+		rq_temp = ready_q;
+		_MyThread * t = rq_temp -> this_t;
+		ready_q = ready_q -> next;
+		q_insert(t, block_q);
+		
+		#ifdef DEBUG
+			q_print(block_q,1);
+		#endif
+		
+		swapcontext(t->context_t, ready_q->this_t->context_t);
+	}
 }
 
 // Terminate invoking thread
@@ -164,11 +200,13 @@ void MyThreadExit(void){
 	   If parent waiting, bring it to ready Q */
 	Node * bq_temp = block_q;
 	_MyThread * child_temp;
+	_MyThread * child_temp_t;
 	int found_context_flag = 0;
 	while(bq_temp -> this_t){
 		child_temp = bq_temp -> this_t -> child;
 		while(child_temp){
-			if((!old_head -> this_t -> is_dead) && child_temp -> context_t == old_head -> this_t -> context_t){
+			if((!old_head -> this_t -> is_dead) && 
+				child_temp -> context_t == old_head -> this_t -> context_t){
 				/* Found context match */
 				#ifdef DEBUG
 					printf(COLOR_ON "\tFound context!\n" COLOR_OFF);
@@ -178,7 +216,7 @@ void MyThreadExit(void){
 					// insert to head of ready Q
 					bq_temp -> this_t -> blocked_on_join=0;
 					q_insert(bq_temp -> this_t, ready_q);
-					
+
 					// remove thread from parent's child list
 					old_head -> this_t -> is_dead = 1;
 					
@@ -187,15 +225,35 @@ void MyThreadExit(void){
 					to_free = bq_temp -> next;
 					bq_temp -> next = bq_temp -> next -> next;
 					free(to_free);
-					
-					//
 				}else if(bq_temp -> this_t -> blocked_on_join_all){//JOIN ALL
+					// remove thread from parent's child list
+					old_head -> this_t -> is_dead = 1;
 					
+					// find number of alive threads
+					int num_alive_children = 0;
+					
+					child_temp_t = bq_temp -> this_t -> child;
+					while(child_temp_t){
+						if(!child_temp_t -> is_dead) num_alive_children++;					
+						child_temp_t = child_temp_t -> next_sib;
+					}
+					
+					if(num_alive_children==0){
+						// insert to head of ready Q
+						bq_temp -> this_t -> blocked_on_join_all=0;
+						q_insert(bq_temp -> this_t, ready_q);
+					
+						//free node of BQ
+						bq_temp -> this_t = bq_temp -> next -> this_t;
+						to_free = bq_temp -> next;
+						bq_temp -> next = bq_temp -> next -> next;
+						free(to_free);
+					}else{
+						
+					}
 				}else{
 					#ifdef DEBUG
-						printf(COLOR_ON 
-						"Error: Thread was in blocked Q with no join flags set!\n"
-						COLOR_OFF);
+						printf("\tError: Thread was in blocked Q with no join flags set!\n");
 					#endif
 				}
 				break;
