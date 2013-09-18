@@ -37,7 +37,7 @@ MyThread MyThreadCreate(void(*start_funct)(void *), void *args){
     context_new->uc_stack.ss_sp   = new_stack;
     context_new->uc_stack.ss_size = STACK_SIZE;
     
-    makecontext(context_new, (void (*)(void)) start_funct, args);
+    makecontext(context_new, (void (*)(void)) start_funct, 1,args);
 	
 	new_thread->context_t = context_new;
 	new_thread->id = (gl_thread_id++);
@@ -320,7 +320,7 @@ void MyThreadInit(void(*start_funct)(void *), void *args){
     context_new->uc_stack.ss_sp   = main_stack;
     context_new->uc_stack.ss_size = STACK_SIZE;
     
-    makecontext(context_new, (void (*)(void)) start_funct, args);
+    makecontext(context_new, (void (*)(void)) start_funct, 1, args);
 	
 	main_thread->context_t = context_new;
 	main_thread->id = (gl_thread_id++);
