@@ -1,8 +1,11 @@
 # Test Cases
-all: one passing ping tree test0 test1 test2 test_join1 test_join2 test_joinall1 test_joinall2
+all: one passing ping tree test0 test1 test2 test_join1 test_join2 test_joinall1 test_joinall2 fib2
 
 fib: fib.c
 	gcc fib.c ../mythread.a -lpthread -o fib.out
+	
+fib2: fib2.c
+	gcc fib2.c ../mythread.a -lpthread -o fib2.out
 
 one: one.c
 	gcc one.c ../mythread.a -lpthread -o one.out
